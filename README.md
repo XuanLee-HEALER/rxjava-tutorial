@@ -1,9 +1,11 @@
 # rxjava-tutorial
+
 关于学习rxJava的demo
 
 ## 第二章
 
 ### 主要内容
+
 * `Observable`类
 * `Observer`接口
 * `Observable`工厂
@@ -24,9 +26,10 @@
 
 ### 使用`Observable.create()`
 
-`Observable.create()`（工厂方法）创建了一个链式操作的起始点。它可以接收一个`ObservableOnSubscribe`类型作为参数，这个类型只有一个方法`subscribe(ObservableEmitter
- emitter)`，这个类型继承了`Emitter`接口，这个接口有上述的三个方法。因为`ObservableOnSubscribe`只有一个抽象方法（函数式接口），我们可以通过lambda表达式来实现它
- 
+`Observable.create()`（工厂方法）创建了一个链式操作的起始点。它可以接收一个`ObservableOnSubscribe`
+类型作为参数，这个类型只有一个方法`subscribe(ObservableEmitter emitter)`，这个类型继承了`Emitter`接口，这个接口有上述的三个方法。因为`ObservableOnSubscribe`
+只有一个抽象方法（函数式接口），我们可以通过lambda表达式来实现它
+
  ```java
 public class Ch2_1 {
 
@@ -53,4 +56,28 @@ public class Ch2_1 {
 source.subscribe(System.out::println, Throwable::printStackTrace);
 ```
 
-emitter中的这些方法并不需要一定将数据推给最终的`Observer`，在链式操作中的其它操作符也可以应用到这些数据上
+emitter中的这些方法并不需要一定将数据推给最终的`Observer`，在链式操作中的其它操作符也可以应用到这些数据上。因为每个`map()`和`filter()
+`可以产生新的Observable，通过下一个操作符我们可以链起每个中间变量
+
+> rxJava2.x不支持emit一个null值，可以通过`Optional`来包装值
+
+### 使用`Observable.just()`
+
+我们可以向`just()`方法内传入最多10个要emit的值，会对每个值调用`onNext()`，然后在推送完值之后调用`onComplete()`
+
+我们也可以使用`Observable.fromIterable()`来从`Iterable`类型中emit值，例如`List`，调用过程和`just()`类似
+
+### `Observer`接口
+
+```java
+public interface Observer<T> {
+    void onSubscribe(@NonNull Disposable d);
+    void onNext(@NonNull T value);
+    void onError(Throwable e);
+    void onComplete();
+}
+```
+
+`Observable`实现了函数式接口`ObservableSource`，这个接口只有一个方法`subscribe(Observer<T> observer)
+`，当传入一个实现了`Observer`接口对象或者一个lambda函数，此时我们将这个`Observer`注册到了`Observable`的emission上
+
