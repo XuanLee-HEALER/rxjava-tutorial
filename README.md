@@ -53,3 +53,4 @@ public class Ch2_1 {
 source.subscribe(System.out::println, Throwable::printStackTrace);
 ```
 
+emitter中的这些方法并不需要一定将数据推给最终的`Observer`，在链式操作中的其它操作符也可以应用到这些数据上
