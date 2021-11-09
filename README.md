@@ -81,3 +81,22 @@ public interface Observer<T> {
 `Observable`实现了函数式接口`ObservableSource`，这个接口只有一个方法`subscribe(Observer<T> observer)
 `，当传入一个实现了`Observer`接口对象或者一个lambda函数，此时我们将这个`Observer`注册到了`Observable`的emission上
 
+如果不指定`onError()`可能会出现异常进入JVM并导致程序崩溃
+
+### Cold versus hot observables
+
+#### A cold `Observable`
+
+一个冷`Observable`像一张CD，每个人都可以听，它会对每个`Observer`重新分配一个emission，保证它们可以获得所有数据。很多数据驱动的`Observable`都是冷的，包括使用`Observable.just
+()`和`Observable.fromIterable()`两个工厂方法创建的
+
+#### A hot `Observable`
+
+一个热`Observable`像一个广播站，它将emission的数据广播到所有的`Observer`，如果一个`Observer`先注册了，那么它将会先消费一些数据，而后面注册的将会丢失这些数据
+
+逻辑上，热`Observable`经常表示事件而不是有限的数据
+
+#### `ConnectableObservable`
+
+这是一个辅助类，可以将任何`Observable`转换为一个热的`Observable`，用法是在普通的`Observable`上调用`publish()
+`方法，这种方式下，`subscribe`并不会直接消费数据，需要显式调用`connect()`方法，在调用这个方法之后注册的`Observer`会丢失之前的数据
