@@ -254,9 +254,6 @@ class Test {
 ### Conditional operators
 
 条件操作符可以有条件emit值或者传递`Observable`
-Conditional operators emit or transform Observable conditionally.  This allows a control
-flow to be organized and the path of execution to be determined, which is especially
-important for adding decision-making ability to your program.
 
 #### takeWhile()和skipWhile()
 
@@ -270,61 +267,22 @@ important for adding decision-making ability to your program.
 
 #### switchIfEmpty()
 
-和
-Similar to defaultIfEmpty(), switchIfEmpty() specifies a different Observable to
-emit values from if the source Observable is empty. This allows you to specify a different
-sequence of emissions in the event that the source is empty rather than emitting just one
-value, as in the case of defaultIfEmpty().
-We could choose to emit three additional strings, for example, if the preceding Observable
-came out empty due to a filter() operation:
-import io.reactivex.rxjava3.core.Observable;
-public class Ch3_04 {
-public static void main(String[] args) {
-Observable.just("Alpha", "Beta", "Gamma")
-.filter(s -> s.startsWith("Z"))
-.switchIfEmpty(Observable.just("Zeta", "Eta", "Theta"))
-.subscribe(i -> System.out.println("RECEIVED: " + i),
-e -> System.out.println("RECEIVED ERROR: " + e));
-}
-}
-Basic Operators
-Chapter 3
-[ 67 ]
-The output of the preceding code snippet is as follows:
-RECEIVED: Zeta
-RECEIVED: Eta
-RECEIVED: Theta
-Of course, if the preceding Observable is not empty, then switchIfEmpty() will have no
-effect and that second specified Observable will not be used.
-Suppressing operators
-There are operators that suppress emissions that do not meet a specified criterion. These
-operators work by simply not calling the onNext() function downstream for a disqualified
-emission, and therefore it does not go down the chain to Observer. We have already seen
-the filter() operator, which is probably the most common suppressing operator. We will
-start with this one.
-filter()
-The filter() operator accepts Predicate<T> for a given Observable<T>. This means
-that you provide it a lambda that qualifies each emission by mapping it to a Boolean value,
-and emissions with false will not go downstream.
-For instance, you can use filter() to only allow string emissions that are not five
-characters in length:
-import io.reactivex.rxjava3.core.Observable;
-public class Ch3_05 {
-public static void main(String[] args) {
-Observable.just("Alpha", "Beta", "Gamma")
-.filter(s -> s.length() != 5)
-.subscribe(s -> System.out.println("RECEIVED: " + s));
-}
-}
-The output of the preceding code snippet is as follows:
-RECEIVED: Beta
-Basic Operators
-Chapter 3
-[ 68 ]
-The filter() operator is probably the most commonly used to suppress emissions.
-Note that if all emissions fail to meet your criteria, the returned
-Observable will be empty, with no emissions occurring before
-onComplete() is called.
+和`defaultIfEmpty()`类似，`switchIfEmpty()`接收一个`Observable`作为参数，如果本身没有值可以emit，那么会将参数作为另一个源。如果前一个源中有值，那么这个方法中的`Observable
+`不会emit值
+
+### Suppressing operators
+
+当有一些值不满足指定的规则是，可以通过这些操作符来删除，它们的实现原理是不对这些不满足的值调用`onNext()`方法
+
+#### filter()
+
+`filter()`接收一个`Predicate<T>`，当每个emit的值被计算为`boolean`值时，如果值为false，那么不会进入下游。如果没有满足的值，那么返回的`Observable`是空的
+
+#### take()
+
+`take()`有两个重载版本，一个接收指定数量的emission，然后在值到达后调用`onComplete()`，另一个`take()`接收指定时间段内emit的值。对应的还有`takeLast()`，它会接收`onComplete
+()`事件调用前指定数量的值
+
 take()
 The take() operator has two overloaded versions. One takes the specified number of
 emissions and calls onComplete() after all of them reach it. It will also dispose of the
