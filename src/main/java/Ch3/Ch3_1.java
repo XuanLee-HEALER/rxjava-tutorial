@@ -13,7 +13,9 @@ public class Ch3_1 {
 //        testDefaultIfEmpty();
 //        testSwitchIfEmpty();
 //        testFilter();
-        testTakeAndTakeLast();
+//        testTakeAndTakeLast();
+//        testSkipAndSkipLast();
+        testDistinct();
     }
 
     private static void testTakeWhileAndSkipWhile() {
@@ -78,6 +80,28 @@ public class Ch3_1 {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void testSkipAndSkipLast() {
+        var source = Observable.range(1, 100);
+        source.skip(90)
+                .subscribe(Ch3_1::printInfo)
+                .dispose();
+        System.out.println("==========================");
+        source.skipLast(10)
+                .subscribe(Ch3_1::printInfo)
+                .dispose();
+    }
+
+    private static void testDistinct() {
+        var source = Observable.just("Adam", "Bobs", "Chalice");
+        source.distinct()
+                .subscribe(Ch3_1::printInfo)
+                .dispose();
+        System.out.println("====================");
+        source.distinct(String::length)
+                .subscribe(Ch3_1::printInfo)
+                .dispose();
     }
 
     private static void printInfo(Object o) {

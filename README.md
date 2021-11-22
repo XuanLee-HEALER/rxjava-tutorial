@@ -280,141 +280,18 @@ class Test {
 
 #### take()
 
-`take()`有两个重载版本，一个接收指定数量的emission，然后在值到达后调用`onComplete()`，另一个`take()`接收指定时间段内emit的值。对应的还有`takeLast()`，它会接收`onComplete
+`take()`有两个重载版本，一个接收指定数量的emission，然后在值到达后调用`onComplete()`，另指定时间段内emit的值。一个`take()`接收对应的还有`takeLast()`，它会接收`onComplete
 ()`事件调用前指定数量的值
 
-take()
-The take() operator has two overloaded versions. One takes the specified number of
-emissions and calls onComplete() after all of them reach it. It will also dispose of the
-entire subscription so that no more emissions will occur. For instance, take(2) will emit
-the first two emissions and then call onComplete() (this will generate an onComplete
-event):
-import io.reactivex.rxjava3.core.Observable;
-public class Ch3_06 {
-public static void main(String[] args) {
-Observable.just("Alpha", "Beta", "Gamma")
-.take(2)
-.subscribe(s -> System.out.println("RECEIVED: " + s));
-}
-}
-The output of the preceding code snippet is as follows:
-RECEIVED: Alpha
-RECEIVED: Beta
-Note that if the take() operator receives fewer emissions than specified, it will simply emit
-what it does get and then emit the onComplete event.
-The other version of the take() operator accepts emissions within the specific time
-duration and then emits onComplete. Of course, our cold Observable emits so quickly
-that it would serve as a bad example for this case. Maybe a better example would be to use
-an Observable.interval() function.
-Let's emit every 300 milliseconds, but set the take() operator to accept emissions for only
-2 seconds in the following code snippet:
-import io.reactivex.rxjava3.core.Observable;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-Basic Operators
-Chapter 3
-[ 69 ]
-import java.util.concurrent.TimeUnit;
-public class Ch3_07 {
-public static void main(String[] args) {
-DateTimeFormatter f = DateTimeFormatter.ofPattern("ss:SSS");
-System.out.println(LocalDateTime.now().format(f));
-Observable.interval(300, TimeUnit.MILLISECONDS)
-.take(2, TimeUnit.SECONDS)
-.subscribe(i -> System.out.println(LocalDateTime.now()
-.format(f) + " RECEIVED: " + i));
-sleep(5000);
-}
-}
-The output of the preceding code is as follows:
-50:644
-51:047 RECEIVED: 0
-51:346 RECEIVED: 1
-51:647 RECEIVED: 2
-51:947 RECEIVED: 3
-52:250 RECEIVED: 4
-52:551 RECEIVED: 5
-You will likely get output similar to that shown here (with each print happening every 300
-milliseconds). The first column is the current time in seconds and milliseconds. As you can
-see, we can get only 6 emissions in 2 seconds if they are spaced out by 300 milliseconds
-because the first value is emitted after 300 milliseconds too.
-Note that there is also a takeLast() operator, which takes the last specified number of
-emissions (or time duration) before the onComplete event is generated. Just keep in mind
-that it internally queues emissions until its onComplete() function is called, and then it
-can identify and emit the last emissions.
-skip()
-The skip() operator does the opposite of the take() operator. It ignores the specified
-number of emissions and then emits the ones that follow. Let's skip the first 90 emissions in
-the following code snippet:
-import io.reactivex.rxjava3.core.Observable;
-public class Ch3_08 {
-public static void main(String[] args) {
-Observable.range(1, 100)
-Basic Operators
-Chapter 3
-[ 70 ]
-.skip(90)
-.subscribe(i -> System.out.println("RECEIVED: " + i));
-}
-}
-The output of the following code snippet is as follows:
-RECEIVED: 91
-RECEIVED: 92
-RECEIVED: 93
-RECEIVED: 94
-RECEIVED: 95
-RECEIVED: 96
-RECEIVED: 97
-RECEIVED: 98
-RECEIVED: 99
-RECEIVED: 100
-Just as in the case of the take() operator, there is also an overloaded version that accepts a
-time duration.
-And there is a skipLast() operator, which skips the last specified number of items (or
-time duration) before the onComplete event is generated. Just keep in mind that the
-skipLast() operator queues and delays emissions until it identifies the last specified
-number of emissions in that scope.
-distinct()
-The distinct() operator emits unique emissions. It suppresses any duplicates that follow.
-Equality is based on the hashCode() and equals() methods implemented by the emitted
-objects. If we want to emit the distinct lengths of strings, this could be done as follows:
-import io.reactivex.rxjava3.core.Observable;
-public class Ch3_09 {
-public static void main(String[] args) {
-Observable.just("Alpha", "Beta", "Gamma")
-.map(String::length)
-.distinct()
-.subscribe(i -> System.out.println("RECEIVED: " + i));
-}
-}
-Basic Operators
-Chapter 3
-[ 71 ]
-The output of the preceding code snippet is as follows:
-RECEIVED: 5
-RECEIVED: 4
-Keep in mind that if you have a wide, diverse spectrum of unique values, distinct() can
-use a bit of memory. Imagine that each subscription results in a HashSet that tracks
-previously captured unique values.
-There is an overloaded version of distinct(Function<T,K> keySelector) that accepts
-a function that maps each emission to a key used for equality logic. Then, the uniqueness of
-each emitted item is based on the uniqueness of this generated key, not the item itself. For
-instance, we can use string length as the key used for uniqueness:
-import io.reactivex.rxjava3.core.Observable;
-public class Ch3_10 {
-public static void main(String[] args) {
-Observable.just("Alpha", "Beta", "Gamma")
-.distinct(String::length)
-.subscribe(i -> System.out.println("RECEIVED: " + i));
-}
-}
-The output of the preceding code snippet is as follows:
-RECEIVED: Alpha
-RECEIVED: Beta
-Alpha is five characters, and Beta is four. Gamma was ignored because Alpha was already
-emitted as a 5-character length value.
-If the generated key is an object, then its uniqueness is based on the equals() method
-implemented by that object.
+#### skip()
+
+`skip()`的作用和`take()`相反，它会忽略指定个数的emission，然后emit后面的值。`skipLast()`类似，忽略emission中指定最后个值
+
+#### distinct()
+
+`distinct()`会emit唯一的值，判断是否相同的标准是emit的值的对象类型中`hashCode()`和`equals()`方法。如果有大量的值需要去重，那么会占用比较大的内存。`distinct(Function<T,
+K> keySelector)`重载版本接收一个函数，将每个emission映射成判断相同逻辑的key
+
 distinctUntilChanged()
 The distinctUntilChanged() function ignores consecutive duplicate emissions. If the
 same value is being emitted repeatedly, all the duplicates are ignored until a new value is
