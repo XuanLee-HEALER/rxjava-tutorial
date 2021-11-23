@@ -1,9 +1,9 @@
 package others;
 
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 解析YML文件
@@ -11,137 +11,83 @@ import java.util.Map;
 public class YAMLParser {
 
     public static void main(String[] args) {
-        var yaml = new Yaml();
+        var yaml = new Yaml(new Constructor(Config.class));
         var yamlStream = YAMLParser.class
                 .getClassLoader()
                 .getResourceAsStream("my.yaml");
-        Map<String, SystemConfig> result = yaml.load(yamlStream);
-        for (var entry: result.entrySet()) {
-            System.out.println(entry.getKey() + "/" + entry.getValue());
-        }
+        SystemConfig config = yaml.load(yamlStream);
+        System.out.println(config);
+
+//        var yaml = new Yaml();
+//        var yamlStream = YAMLParser.class
+//                .getClassLoader()
+//                .getResourceAsStream("test.yaml");
+//        Map<String, Object> result = yaml.load(yamlStream);
+//        System.out.println(result);
     }
 
-    static class Config {
-        private SystemConfig autoCache;
-        private Service service;
-    }
+}
 
-    static class SystemConfig {
-        List<Cache> Caches;
+class Config {
+    public SystemConfig autoCache;
+    public Service service;
+    public SystemItem system;
+    public Pty pty;
+    public ResourcesItem resources;
+    public AccountItem account;
 
-        public List<Cache> getCaches() {
-            return Caches;
-        }
+}
 
-        public void setCaches(List<Cache> caches) {
-            Caches = caches;
-        }
+class Service {
+    public String forwardedHost;
+    public Publish publish;
+}
 
-        class Cache {
-            private String Name;
-            private String ServiceId;
-            private boolean Eternal;
-            private int TimeToLive;
-            private int TimeToIdle;
-            private String EvictionPolicy;
-            private String MaxElement;
+class Publish {
+    public boolean all;
+    public List<String> include;
+}
 
-            public String getName() {
-                return Name;
-            }
+class SystemConfig {
+    public List<Cache> Caches;
+}
 
-            public void setName(String name) {
-                Name = name;
-            }
+class Cache {
+    public String Name;
+    public String ServiceId;
+    public boolean Eternal;
+    public int TimeToLive;
+    public int TimeToIdle;
+    public String EvictionPolicy;
+    public String MaxElement;
+}
 
-            public String getServiceId() {
-                return ServiceId;
-            }
+class SystemItem {
+    public boolean debugMode;
+}
 
-            public void setServiceId(String serviceId) {
-                ServiceId = serviceId;
-            }
+/**
+ * 调试模式
+ */
+class Pty {
+    public boolean debug;
+}
 
-            public boolean isEternal() {
-                return Eternal;
-            }
+class ResourcesItem {
+    public String base;
+    public String custom;
+}
 
-            public void setEternal(boolean eternal) {
-                Eternal = eternal;
-            }
+class AccountItem {
+    public boolean autoCreateUser;
+    public String defaultRoleId;
+    public String defaultGroupId;
+    public String phoneCodeLimit;
+    public Kaptcha kaptcha;
+}
 
-            public int getTimeToLive() {
-                return TimeToLive;
-            }
-
-            public void setTimeToLive(int timeToLive) {
-                TimeToLive = timeToLive;
-            }
-
-            public int getTimeToIdle() {
-                return TimeToIdle;
-            }
-
-            public void setTimeToIdle(int timeToIdle) {
-                TimeToIdle = timeToIdle;
-            }
-
-            public String getEvictionPolicy() {
-                return EvictionPolicy;
-            }
-
-            public void setEvictionPolicy(String evictionPolicy) {
-                EvictionPolicy = evictionPolicy;
-            }
-
-            public String getMaxElement() {
-                return MaxElement;
-            }
-
-            public void setMaxElement(String maxElement) {
-                MaxElement = maxElement;
-            }
-        }
-    }
-    static class Service {
-        private String forwardedHost;
-        private Publish publish;
-
-        public String getForwardedHost() {
-            return forwardedHost;
-        }
-
-        public void setForwardedHost(String forwardedHost) {
-            this.forwardedHost = forwardedHost;
-        }
-
-        public Publish getPublish() {
-            return publish;
-        }
-
-        public void setPublish(Publish publish) {
-            this.publish = publish;
-        }
-
-        static class Publish {
-            private boolean all;
-            private List<Map<String, String>> include;
-
-            public boolean isAll() {
-                return all;
-            }
-
-            public void setAll(boolean all) {
-                this.all = all;
-            }
-
-            public List<Map<String, String>> getInclude() {
-                return include;
-            }
-
-            public void setInclude(List<Map<String, String>> include) {
-                this.include = include;
-            }
-        }
-    }
+class Kaptcha {
+    public boolean enable;
+    public int length;
+    public String complexity;
 }
